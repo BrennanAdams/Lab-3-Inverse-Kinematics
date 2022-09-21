@@ -47,21 +47,12 @@ vR = 0
 # TODO
 # Create you state and goals (waypoints) variable here
 # You have to MANUALLY figure out the waypoints, one sample is provided for you in the instructions
-
+waypoint_1 = (-5.5,-5.00)
 while robot.step(timestep) != -1:
 
     # STEP 2.1: Calculate error with respect to current and goal position
+    distance_error = sqrt((pose_x - waypoint_1[0])**2+(pose_y - waypoint_1[1])**2)
     pass   
-
-    #Heading error
-    #gole pose - current pose = position remaining. take atan2(y,x) and thats the theta we want 
-    goal_pose = (3,4) #TODO set this later
-    x = goal_pose[0] - pose_x
-    y = goal_pose[1] - pose_y
-    theta = math.atan2(y,x)
-    #check is calcd theta = given theta
-    if(pose_theta - theta < 0.5 and pose_theta - theta > -0.5): #if within 1 radian (might need to change later)
-        pass
     
     # STEP 2.2: Feedback Controller
     pass
