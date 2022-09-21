@@ -6,8 +6,8 @@ from controller import Robot, Motor
 import math
 
 # TODO: Fill out with correct values from Robot Spec Sheet (or inspect PROTO definition for the robot)
-MAX_SPEED = 0.0001 # [rad/s]
-MAX_SPEED_MS = 0.0001 # [m/s]
+MAX_SPEED = 2.84 # [rad/s]
+MAX_SPEED_MS = .22 # [m/s]
 AXLE_LENGTH = 0.0001 # [m]
 
 
