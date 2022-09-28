@@ -90,7 +90,31 @@ while robot.step(timestep) != -1:
     # NOTE that the odometry should ONLY be a function of 
     # (vL, vR, MAX_SPEED, MAX_SPEED_MS, timestep, AXLE_LENGTH, pose_x, pose_y, pose_theta)
     # Odometry code. Don't change speeds (vL and vR) after this line
-    
+    MAX_SPEED = 6.67 # [rad/s]
+
+    MAX_SPEED_MS = 0.22 # [m/s]
+
+    AXLE_LENGTH = 0.16 # m
+
+    distL = vL/MAX_SPEED * MAX_SPEED_MS * timestep/1000.0
+
+     distR = vR/MAX_SPEED * MAX_SPEED_MS * timestep/1000.0
+
+     pose_x += (distL+distR) / 2.0 * math.cos(pose_theta)
+
+     pose_y += (distL+distR) / 2.0 * math.sin(pose_theta)
+
+     pose_theta += (distR-distL)/AXLE_LENGTH
+
+ 
+
+    if pose_theta > 6.28+3.14/2: pose_theta -= 6.28
+
+    if pose_theta < -3.14: pose_theta += 6.28
+
+    robot_parts[MOTOR_LEFT].setVelocity(vL)
+
+    robot_parts[MOTOR_RIGHT].setVelocity(vR)
     
     
 
