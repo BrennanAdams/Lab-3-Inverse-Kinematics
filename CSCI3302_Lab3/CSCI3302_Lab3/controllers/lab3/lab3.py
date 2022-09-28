@@ -55,9 +55,8 @@ while robot.step(timestep) != -1:
     bearing_error = math.atan((pose_y - waypoint_1[1])/(pose_x - waypoint_1[0])) - pose_theta
         #Heading error
     #gole pose - current pose = position remaining. take atan2(y,x) and thats the theta we want 
-    goal_pose = (3,4) #TODO set this later
-    x = goal_pose[0] - pose_x
-    y = goal_pose[1] - pose_y
+    x = waypoint_1[0] - pose_x
+    y = waypoint_1[1] - pose_y
     theta = math.atan2(y,x)
     #check is calcd theta = given theta
     if(pose_theta - theta < 0.5 and pose_theta - theta > -0.5): #if within 1 radian (might need to change later)
