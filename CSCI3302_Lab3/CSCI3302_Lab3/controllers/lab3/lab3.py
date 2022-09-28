@@ -51,8 +51,8 @@ waypoint_1 = (-5.5,-5.00)
 while robot.step(timestep) != -1:
 
     # STEP 2.1: Calculate error with respect to current and goal position
-    distance_error = sqrt((pose_x - waypoint_1[0])**2+(pose_y - waypoint_1[1])**2)
-    bearing_error = atan((pose_y - waypoint_1[1])/(pose_x - waypoint_1[0])) - pose_theta
+    distance_error = math.sqrt((pose_x - waypoint_1[0])**2+(pose_y - waypoint_1[1])**2)
+    bearing_error = math.atan((pose_y - waypoint_1[1])/(pose_x - waypoint_1[0])) - pose_theta
         #Heading error
     #gole pose - current pose = position remaining. take atan2(y,x) and thats the theta we want 
     goal_pose = (3,4) #TODO set this later
