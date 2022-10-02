@@ -9,6 +9,7 @@ import math
 MAX_SPEED = 2.84 # [rad/s]
 MAX_SPEED_MS = .22 # [m/s]
 AXLE_LENGTH = .160 # [m]
+AXEL_RADIUS = AXLE_LENGTH/2
 
 
 
@@ -56,6 +57,36 @@ while robot.step(timestep) != -1:
     heading_error = math.atan2((waypoint_1[1] - pose_y),(waypoint_1[0] - pose_x))
     
     # STEP 2.2: Feedback Controller
+    #move to feedback controller class
+    if distance_error > .015:
+        distance_constant = .2
+        if distance_error > .04:
+            phi_l = (distance_error*distance_constant - (bearing_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+            phi_r = (distance_error*distance_constant + (bearing_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+        elif distance_error <= .04:
+            phi_l = (distance_error - (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+            phi_r = (distance_error + (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+
+        if phi_l > phi_r:
+            robot_parts[MOTOR_LEFT].setVelocity((robot_parts[MOTOR_LEFT].getMaxVelocity()/10) * (phi_l/phi_r))
+            robot_parts[MOTOR_RIGHT].setVelocity((robot_parts[MOTOR_RIGHT].getMaxVelocity()/10))
+            left_wheel_direction = 1/10 * (phi_l/phi_r)
+            right_wheel_direction = 1/10
+        elif phi_l < phi_r:
+            robot_parts[MOTOR_LEFT].setVelocity((robot_parts[MOTOR_LEFT].getMaxVelocity()/10))
+            robot_parts[MOTOR_RIGHT].setVelocity((robot_parts[MOTOR_RIGHT].getMaxVelocity()/10) * (phi_r/phi_l))
+            left_wheel_direction = 1/10
+            right_wheel_direction = 1/10 * (phi_r/phi_l)
+        else:
+            robot_parts[MOTOR_LEFT].setVelocity(robot_parts[MOTOR_LEFT].getMaxVelocity()/10)
+            robot_parts[MOTOR_RIGHT].setVelocity(robot_parts[MOTOR_RIGHT].getMaxVelocity()/10)
+            left_wheel_direction = 1/10
+            right_wheel_direction = 1/10
+    else:
+        robot_parts[MOTOR_LEFT].setVelocity(0)
+        robot_parts[MOTOR_RIGHT].setVelocity(0)
+        left_wheel_direction = 0
+        right_wheel_direction = 0
     pass
     
     # STEP 1: Inverse Kinematics Equations (vL and vR as a function dX and dTheta)
