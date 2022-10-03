@@ -91,8 +91,8 @@ while robot.step(timestep) != -1:
     
     # STEP 1: Inverse Kinematics Equations (vL and vR as a function dX and dTheta)
     # Note that vL and vR in code is phi_l and phi_r on the slides/lecture
-    vL = (dX - (dTheta/2))/(MAX_SPEED_MS/MAX_SPEED)
-    vR = (dX - (dTheta/2))/(MAX_SPEED_MS/MAX_SPEED)
+    vL = (phi_l - (heading_error/2))/(MAX_SPEED_MS/MAX_SPEED)
+    vR = (phi_r - (heading_error/2))/(MAX_SPEED_MS/MAX_SPEED)
     pass
     
     # STEP 2.3: Proportional velocities
