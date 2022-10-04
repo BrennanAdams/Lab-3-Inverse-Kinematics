@@ -6,12 +6,10 @@ from controller import Robot, Motor
 import math
 
 # TODO: Fill out with correct values from Robot Spec Sheet (or inspect PROTO definition for the robot)
-MAX_SPEED = 2.84 # [rad/s]
+MAX_SPEED = 6.67 # [rad/s]
 MAX_SPEED_MS = .22 # [m/s]
 AXLE_LENGTH = .160 # [m]
 AXEL_RADIUS = AXLE_LENGTH/2
-
-
 
 MOTOR_LEFT = 0 # Left wheel index
 MOTOR_RIGHT = 1 # Right wheel index
@@ -37,13 +35,86 @@ for i in range(len(part_names)):
         robot_parts[i].setPosition(float(target_pos[i]))
 
 # Odometry
-pose_x     = 0
-pose_y     = 0
-pose_theta = 0
+global pose_x, pose_y, pose_theta
+pose_x     = -8
+pose_y     = -5
+pose_theta = 0.00231134 #radians
 
 # Rotational Motor Velocity [rad/s]
+global vL, vR, distance_error, bearing_error, heading_error
 vL = 0
 vR = 0
+
+
+def feedback_controller():
+    global vL, vR, distance_error, bearing_error, heading_error
+    print("feedback_controller1", vL, vR)
+    if distance_error > .015:
+        distance_constant = .2
+        if distance_error > .04:
+            phi_l = (distance_error*distance_constant - (bearing_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+            phi_r = (distance_error*distance_constant + (bearing_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+        elif distance_error <= .04:
+            phi_l = (distance_error - (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+            phi_r = (distance_error + (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+
+        if phi_l > phi_r:
+            vL = (MAX_SPEED/2) * (phi_l/phi_r)
+            vR = (MAX_SPEED/2)
+
+        elif phi_l < phi_r:
+            vL = (MAX_SPEED/2)
+            vR = (MAX_SPEED/2) * (phi_r/phi_l)
+
+        else:
+            vL = MAX_SPEED/2
+            vR = MAX_SPEED/2
+    else:
+        vL = 0
+        vR = 0
+    print("feedback_controller1", vL, vR)
+
+
+
+def heading():
+    global vL, vR, distance_error, bearing_error, heading_error
+    if heading_error < -.01:
+        vL = MAX_SPEED/2
+        vR = -MAX_SPEED/2
+    elif heading_error > .01:
+        vL = -MAX_SPEED/2
+        vR = MAX_SPEED/2
+    else:
+        vL = 0
+        vR = 0
+    print("heading", vL, vR)
+
+def distance():
+    global vL, vR, distance_error, bearing_error, heading_error
+    if distance_error > .01:
+        vL = MAX_SPEED/2
+        vR = MAX_SPEED/2
+    elif distance_error < .01:
+        vL = 0
+        vR = 0
+        heading()
+    print("distance", vL, vR)
+            
+
+def bearing():
+    global vL, vR, distance_error, bearing_error, heading_error
+    if bearing_error < -.01:
+        vL = MAX_SPEED/2
+        vR = -MAX_SPEED/2
+    elif bearing_error > .01:
+        vL = -MAX_SPEED/2
+        vR = MAX_SPEED/2
+    else:
+        vL = 0
+        vR = 0
+        distance()
+    print("bearing", vL, vR)
+
 
 # TODO
 # Create you state and goals (waypoints) variable here
@@ -56,48 +127,22 @@ while robot.step(timestep) != -1:
     bearing_error = math.atan((pose_y - waypoint_1[1])/(pose_x - waypoint_1[0])) - pose_theta
     heading_error = math.atan2((waypoint_1[1] - pose_y),(waypoint_1[0] - pose_x))
     
+    bearing()
+    
     # STEP 2.2: Feedback Controller
     #move to feedback controller class
-    if distance_error > .015:
-        distance_constant = .2
-        if distance_error > .04:
-            phi_l = (distance_error*distance_constant - (bearing_error*AXLE_LENGTH)/2)/AXEL_RADIUS
-            phi_r = (distance_error*distance_constant + (bearing_error*AXLE_LENGTH)/2)/AXEL_RADIUS
-        elif distance_error <= .04:
-            phi_l = (distance_error - (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
-            phi_r = (distance_error + (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
-
-        if phi_l > phi_r:
-            robot_parts[MOTOR_LEFT].setVelocity((robot_parts[MOTOR_LEFT].getMaxVelocity()/10) * (phi_l/phi_r))
-            robot_parts[MOTOR_RIGHT].setVelocity((robot_parts[MOTOR_RIGHT].getMaxVelocity()/10))
-            left_wheel_direction = 1/10 * (phi_l/phi_r)
-            right_wheel_direction = 1/10
-        elif phi_l < phi_r:
-            robot_parts[MOTOR_LEFT].setVelocity((robot_parts[MOTOR_LEFT].getMaxVelocity()/10))
-            robot_parts[MOTOR_RIGHT].setVelocity((robot_parts[MOTOR_RIGHT].getMaxVelocity()/10) * (phi_r/phi_l))
-            left_wheel_direction = 1/10
-            right_wheel_direction = 1/10 * (phi_r/phi_l)
-        else:
-            robot_parts[MOTOR_LEFT].setVelocity(robot_parts[MOTOR_LEFT].getMaxVelocity()/10)
-            robot_parts[MOTOR_RIGHT].setVelocity(robot_parts[MOTOR_RIGHT].getMaxVelocity()/10)
-            left_wheel_direction = 1/10
-            right_wheel_direction = 1/10
-    else:
-        robot_parts[MOTOR_LEFT].setVelocity(0)
-        robot_parts[MOTOR_RIGHT].setVelocity(0)
-        left_wheel_direction = 0
-        right_wheel_direction = 0
-    pass
+    feedback_controller()
+    print("default1", vL, vR)
     
     # STEP 1: Inverse Kinematics Equations (vL and vR as a function dX and dTheta)
     # Note that vL and vR in code is phi_l and phi_r on the slides/lecture
-    vL = (phi_l - (heading_error/2))/(MAX_SPEED_MS/MAX_SPEED)
-    vR = (phi_r - (heading_error/2))/(MAX_SPEED_MS/MAX_SPEED)
+    #vL = (dX - (dTheta/2))/(MAX_SPEED_MS/MAX_SPEED)
+    #vR = (dX - (dTheta/2))/(MAX_SPEED_MS/MAX_SPEED)
     pass
     
     # STEP 2.3: Proportional velocities
-    vL = 0 # Left wheel velocity in rad/s
-    vR = 0 # Right wheel velocity in rad/s
+    #vL = 0 # Left wheel velocity in rad/s
+    #vR = 0 # Right wheel velocity in rad/s
     pass
 
     # STEP 2.4: Clamp wheel speeds
@@ -112,11 +157,6 @@ while robot.step(timestep) != -1:
     # NOTE that the odometry should ONLY be a function of 
     # (vL, vR, MAX_SPEED, MAX_SPEED_MS, timestep, AXLE_LENGTH, pose_x, pose_y, pose_theta)
     # Odometry code. Don't change speeds (vL and vR) after this line
-    MAX_SPEED = 6.67 # [rad/s]
-
-    MAX_SPEED_MS = 0.22 # [m/s]
-
-    AXLE_LENGTH = 0.16 # m
 
     distL = vL/MAX_SPEED * MAX_SPEED_MS * timestep/1000.0
 
@@ -127,17 +167,7 @@ while robot.step(timestep) != -1:
     pose_y += (distL+distR) / 2.0 * math.sin(pose_theta)
 
     pose_theta += (distR-distL)/AXLE_LENGTH
-
- 
-
-    if pose_theta > 6.28+3.14/2: pose_theta -= 6.28
-
-    if pose_theta < -3.14: pose_theta += 6.28
-
-    robot_parts[MOTOR_LEFT].setVelocity(vL)
-
-    robot_parts[MOTOR_RIGHT].setVelocity(vR)
-    
+    print("default2", vL, vR)
     
 
     ########## End Odometry Code ##################
@@ -151,7 +181,7 @@ while robot.step(timestep) != -1:
 
     # TODO
     # Set robot motors to the desired velocities
-    robot_parts[MOTOR_LEFT].setVelocity(0)
-    robot_parts[MOTOR_RIGHT].setVelocity(0)
+    robot_parts[MOTOR_LEFT].setVelocity(vL)
+    robot_parts[MOTOR_RIGHT].setVelocity(vR)
 
     
