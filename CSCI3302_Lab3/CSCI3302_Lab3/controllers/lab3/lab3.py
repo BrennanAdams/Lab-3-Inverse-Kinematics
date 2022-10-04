@@ -57,6 +57,7 @@ def feedback_controller():
         elif distance_error <= .04:
             phi_l = (distance_error - (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
             phi_r = (distance_error + (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
+            change_waypoint = 1
 
         if phi_l > phi_r:
             vL = (MAX_SPEED/2) * (phi_l/phi_r)
@@ -119,13 +120,21 @@ def bearing():
 # TODO
 # Create you state and goals (waypoints) variable here
 # You have to MANUALLY figure out the waypoints, one sample is provided for you in the instructions
-waypoint_1 = (-5.5,-5.00)
+waypoint_1 = (-6,-6.00)
+waypoint_2 = (-3.5,-3)
+global change_waypoint
+change_waypoint = 0
 while robot.step(timestep) != -1:
 
     # STEP 2.1: Calculate error with respect to current and goal position
-    distance_error = math.sqrt((pose_x - waypoint_1[0])**2+(pose_y - waypoint_1[1])**2)
-    bearing_error = math.atan((pose_y - waypoint_1[1])/(pose_x - waypoint_1[0])) - pose_theta
-    heading_error = math.atan2((waypoint_1[1] - pose_y),(waypoint_1[0] - pose_x))
+    if(change_waypoint == 0):
+        distance_error = math.sqrt((pose_x - waypoint_1[0])**2+(pose_y - waypoint_1[1])**2)
+        bearing_error = math.atan((pose_y - waypoint_1[1])/(pose_x - waypoint_1[0])) - pose_theta
+        heading_error = math.atan2((waypoint_1[1] - pose_y),(waypoint_1[0] - pose_x))
+    else:
+        distance_error = math.sqrt((pose_x - waypoint_2[0])**2+(pose_y - waypoint_2[1])**2)
+        bearing_error = math.atan((pose_y - waypoint_2[1])/(pose_x - waypoint_2[0])) - pose_theta
+        heading_error = math.atan2((waypoint_2[1] - pose_y),(waypoint_2[0] - pose_x))
     
     bearing()
     
