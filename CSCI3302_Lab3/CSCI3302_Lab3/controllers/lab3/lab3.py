@@ -30,6 +30,9 @@ part_names = ("left wheel motor", "right wheel motor")
 target_pos = ('inf', 'inf') 
 robot_parts = []
 
+global waypoint_counter
+waypoint_counter = 0
+
 for i in range(len(part_names)):
         robot_parts.append(robot.getDevice(part_names[i]))
         robot_parts[i].setPosition(float(target_pos[i]))
@@ -47,7 +50,7 @@ vR = 0
 
 
 def feedback_controller():
-    global vL, vR, distance_error, bearing_error, heading_error
+    global vL, vR, distance_error, bearing_error, heading_error, waypoint_counter
     print("feedback_controller1", vL, vR)
     if distance_error > .015:
         distance_constant = .2
@@ -57,14 +60,15 @@ def feedback_controller():
         else:
             phi_l = (distance_error - (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
             phi_r = (distance_error + (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
-            change_waypoint = 1
+            if (waypoint_counter == 0):
+                waypoint_counter = waypoint_counter + 1
 
         if phi_l > phi_r:
-            vL = (MAX_SPEED/2) * (phi_l/phi_r)
-            vR = (MAX_SPEED/2)
+            vL = (MAX_SPEED/3) * (phi_l/phi_r)
+            vR = (MAX_SPEED/3)
         elif phi_l < phi_r:
-            vL = (MAX_SPEED/2)
-            vR = (MAX_SPEED/2) * (phi_r/phi_l)
+            vL = (MAX_SPEED/3)
+            vR = (MAX_SPEED/3) * (phi_r/phi_l)
         else:
             vL = MAX_SPEED/2
             vR = MAX_SPEED/2
@@ -122,7 +126,6 @@ def bearing():
 waypoint_1 = (-6,-6.00)
 waypoint_2 = (-3.5,-3)
 waypoints = [waypoint_1,waypoint_2]
-waypoint_counter = 0
 while robot.step(timestep) != -1:
 
     # STEP 2.1: Calculate error with respect to current and goal position
