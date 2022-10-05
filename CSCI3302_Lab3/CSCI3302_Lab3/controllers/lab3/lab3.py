@@ -64,11 +64,11 @@ def feedback_controller():
                 waypoint_counter = waypoint_counter + 1
 
         if phi_l > phi_r:
-            vL = (MAX_SPEED/3) * (phi_l/phi_r)
-            vR = (MAX_SPEED/3)
+            vL = (MAX_SPEED/4) * (phi_l/phi_r)
+            vR = (MAX_SPEED/4)
         elif phi_l < phi_r:
-            vL = (MAX_SPEED/3)
-            vR = (MAX_SPEED/3) * (phi_r/phi_l)
+            vL = (MAX_SPEED/4)
+            vR = (MAX_SPEED/4) * (phi_r/phi_l)
         else:
             vL = MAX_SPEED/2
             vR = MAX_SPEED/2
