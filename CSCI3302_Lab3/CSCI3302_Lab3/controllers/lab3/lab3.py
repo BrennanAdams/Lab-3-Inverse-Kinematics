@@ -54,7 +54,7 @@ def feedback_controller():
         if distance_error > .04:
             phi_l = (distance_error*distance_constant - (bearing_error*AXLE_LENGTH)/2)/AXEL_RADIUS
             phi_r = (distance_error*distance_constant + (bearing_error*AXLE_LENGTH)/2)/AXEL_RADIUS
-        elif distance_error <= .04:
+        else:
             phi_l = (distance_error - (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
             phi_r = (distance_error + (heading_error*AXLE_LENGTH)/2)/AXEL_RADIUS
             change_waypoint = 1
@@ -62,17 +62,16 @@ def feedback_controller():
         if phi_l > phi_r:
             vL = (MAX_SPEED/2) * (phi_l/phi_r)
             vR = (MAX_SPEED/2)
-
         elif phi_l < phi_r:
             vL = (MAX_SPEED/2)
             vR = (MAX_SPEED/2) * (phi_r/phi_l)
-
         else:
             vL = MAX_SPEED/2
             vR = MAX_SPEED/2
     else:
         vL = 0
         vR = 0
+        waypoint_counter = waypoint_counter + 1
     print("feedback_controller1", vL, vR)
 
 
@@ -122,20 +121,14 @@ def bearing():
 # You have to MANUALLY figure out the waypoints, one sample is provided for you in the instructions
 waypoint_1 = (-6,-6.00)
 waypoint_2 = (-3.5,-3)
-global change_waypoint
-change_waypoint = 0
+waypoints = [waypoint_1,waypoint_2]
+waypoint_counter = 0
 while robot.step(timestep) != -1:
 
     # STEP 2.1: Calculate error with respect to current and goal position
-    if(change_waypoint == 0):
-        distance_error = math.sqrt((pose_x - waypoint_1[0])**2+(pose_y - waypoint_1[1])**2)
-        bearing_error = math.atan((pose_y - waypoint_1[1])/(pose_x - waypoint_1[0])) - pose_theta
-        heading_error = math.atan2((waypoint_1[1] - pose_y),(waypoint_1[0] - pose_x))
-    else:
-        distance_error = math.sqrt((pose_x - waypoint_2[0])**2+(pose_y - waypoint_2[1])**2)
-        bearing_error = math.atan((pose_y - waypoint_2[1])/(pose_x - waypoint_2[0])) - pose_theta
-        heading_error = math.atan2((waypoint_2[1] - pose_y),(waypoint_2[0] - pose_x))
-    
+    distance_error = math.sqrt((pose_x - waypoints[waypoint_counter][0])**2+(pose_y - waypoints[waypoint_counter][1])**2)
+    bearing_error = math.atan((pose_y - waypoints[waypoint_counter][1])/(pose_x - waypoints[waypoint_counter][0])) - pose_theta
+    heading_error = math.atan2((waypoints[waypoint_counter][1] - pose_y),(waypoints[waypoint_counter][0] - pose_x))
     bearing()
     
     # STEP 2.2: Feedback Controller
